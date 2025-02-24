@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify, render_template
-import requests
+import os
 import random
+import requests
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# List of multiple API keys
+# ✅ List of Google Search API keys to rotate requests
 API_KEYS = [
     "YOUR_API_KEY_1",
     "YOUR_API_KEY_2",
@@ -15,27 +16,46 @@ API_KEYS = [
     "YOUR_API_KEY_7",
 ]
 
-CX = "YOUR_CX_CODE"  # Your Google Custom Search Engine ID
+# ✅ Search Engine ID (Replace with yours)
+SEARCH_ENGINE_ID = "YOUR_SEARCH_ENGINE_ID"
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+def get_random_api_key():
+    """Randomly selects an API key from the list to distribute the load."""
+    return random.choice(API_KEYS)
 
-@app.route("/search")
-def search():
-    query = request.args.get("query")
-    api_key = random.choice(API_KEYS)  # Select a random API key
-    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={CX}"
+def google_search(query):
+    """Fetch search results from Google API."""
+    api_key = get_random_api_key()
+    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={SEARCH_ENGINE_ID}"
     
     response = requests.get(url)
-    data = response.json()
+    if response.status_code == 200:
+        data = response.json()
+        results = []
+        for item in data.get("items", []):
+            results.append({
+                "title": item.get("title"),
+                "link": item.get("link"),
+                "snippet": item.get("snippet")
+            })
+        return results
+    return []
 
-    results = []
-    if "items" in data:
-        for item in data["items"]:
-            results.append({"title": item["title"], "link": item["link"]})
+@app.route("/", methods=["GET"])
+def home():
+    """Render the home page."""
+    return render_template("index.html")
 
-    return jsonify({"results": results})
+@app.route("/search", methods=["POST"])
+def search():
+    """Handle search requests from frontend."""
+    query = request.form.get("query")
+    if not query:
+        return jsonify({"error": "No query provided"}), 400
+
+    results = google_search(query)
+    return jsonify(results)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
