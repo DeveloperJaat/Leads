@@ -3,33 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Search Leads</title>
-    <script>
-        async function fetchLeads() {
-            let business = document.getElementById("business").value;
-            let domain = document.getElementById("domain").value;
-            let location = document.getElementById("location").value;
-            
-            let response = await fetch("/search", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ business, domain, location })
-            });
-            
-            let data = await response.json();
-            document.getElementById("output").innerText = JSON.stringify(data, null, 2);
-        }
-    </script>
+    <title>Google Search API</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h2>Google Search Leads Finder</h2>
-    <label>Business Name:</label>
-    <input type="text" id="business"><br><br>
-    <label>Domain Extension:</label>
-    <input type="text" id="domain"><br><br>
-    <label>Location:</label>
-    <input type="text" id="location"><br><br>
-    <button onclick="fetchLeads()">Get Leads</button>
-    <pre id="output"></pre>
+    <div class="container">
+        <h2>Google Search API</h2>
+        <input type="text" id="searchQuery" placeholder="Enter search query">
+        <button onclick="search()">Search</button>
+        <div id="results"></div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
