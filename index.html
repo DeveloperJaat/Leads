@@ -4,15 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Search API</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        input {
+            width: 60%;
+            padding: 10px;
+            margin: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        #results {
+            margin-top: 20px;
+            text-align: left;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Google Search API</h2>
-        <input type="text" id="searchQuery" placeholder="Enter search query">
-        <button onclick="search()">Search</button>
-        <div id="results"></div>
-    </div>
-    <script src="script.js"></script>
+    <h2>Google Search API</h2>
+    <input type="text" id="query" placeholder="Enter search query">
+    <button onclick="search()">Search</button>
+    <div id="results"></div>
+
+    <script>
+        function search() {
+            let query = document.getElementById("query").value;
+            fetch(`/search?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                let resultDiv = document.getElementById("results");
+                resultDiv.innerHTML = "<h3>Search Results:</h3>";
+                data.results.forEach((item, index) => {
+                    resultDiv.innerHTML += `<p><b>${index + 1}.</b> <a href="${item.link}" target="_blank">${item.title}</a></p>`;
+                });
+            });
+        }
+    </script>
 </body>
 </html>
