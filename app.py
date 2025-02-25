@@ -1,61 +1,71 @@
-import os
-import random
 import requests
-from flask import Flask, request, jsonify, render_template
+import json
+import pandas as pd
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# ✅ List of Google Search API keys to rotate requests
+# List of 7 API keys and their corresponding Search Engine IDs
 API_KEYS = [
-    "YOUR_API_KEY_1",
-    "YOUR_API_KEY_2",
-    "YOUR_API_KEY_3",
-    "YOUR_API_KEY_4",
-    "YOUR_API_KEY_5",
-    "YOUR_API_KEY_6",
-    "YOUR_API_KEY_7",
+    {"api_key": "YOUR_API_KEY_1", "cx": "YOUR_SEARCH_ENGINE_ID_1"},
+    {"api_key": "YOUR_API_KEY_2", "cx": "YOUR_SEARCH_ENGINE_ID_2"},
+    {"api_key": "YOUR_API_KEY_3", "cx": "YOUR_SEARCH_ENGINE_ID_3"},
+    {"api_key": "YOUR_API_KEY_4", "cx": "YOUR_SEARCH_ENGINE_ID_4"},
+    {"api_key": "YOUR_API_KEY_5", "cx": "YOUR_SEARCH_ENGINE_ID_5"},
+    {"api_key": "YOUR_API_KEY_6", "cx": "YOUR_SEARCH_ENGINE_ID_6"},
+    {"api_key": "YOUR_API_KEY_7", "cx": "YOUR_SEARCH_ENGINE_ID_7"},
 ]
 
-# ✅ Search Engine ID (Replace with yours)
-SEARCH_ENGINE_ID = "YOUR_SEARCH_ENGINE_ID"
-
-def get_random_api_key():
-    """Randomly selects an API key from the list to distribute the load."""
-    return random.choice(API_KEYS)
-
-def google_search(query):
-    """Fetch search results from Google API."""
-    api_key = get_random_api_key()
-    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={SEARCH_ENGINE_ID}"
+# Function to fetch search results using rotating API keys
+def fetch_results(query, start_index):
+    api_info = API_KEYS[start_index % len(API_KEYS)]
+    api_key = api_info["api_key"]
+    cx = api_info["cx"]
     
+    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={cx}"
     response = requests.get(url)
+    
     if response.status_code == 200:
-        data = response.json()
-        results = []
-        for item in data.get("items", []):
-            results.append({
-                "title": item.get("title"),
-                "link": item.get("link"),
-                "snippet": item.get("snippet")
-            })
-        return results
-    return []
+        return response.json()
+    else:
+        return None
 
-@app.route("/", methods=["GET"])
-def home():
-    """Render the home page."""
-    return render_template("index.html")
+# Extract and filter useful lead data
+def extract_leads(data):
+    leads = []
+    for item in data.get("items", []):
+        title = item.get("title", "")
+        link = item.get("link", "")
+        snippet = item.get("snippet", "")
 
-@app.route("/search", methods=["POST"])
-def search():
-    """Handle search requests from frontend."""
-    query = request.form.get("query")
-    if not query:
-        return jsonify({"error": "No query provided"}), 400
+        # Simulate extracting emails (replace with real email extraction logic)
+        email = "example@example.com" if "contact" in snippet.lower() else ""
 
-    results = google_search(query)
-    return jsonify(results)
+        if email:
+            first_name, last_name = title.split(" ")[0], title.split(" ")[-1]
+            leads.append({"First Name": first_name, "Last Name": last_name, "Email": email, "Website": link})
+    
+    return leads
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+@app.route('/scrape', methods=['GET'])
+def scrape():
+    query = request.args.get("query")
+    total_results = 600
+    results_per_request = 90
+    all_leads = []
+
+    for i in range(0, total_results, results_per_request):
+        data = fetch_results(query, i // results_per_request)
+        if data:
+            leads = extract_leads(data)
+            all_leads.extend(leads)
+
+    # Convert to DataFrame and save to Excel
+    df = pd.DataFrame(all_leads)
+    df.to_excel("leads.xlsx", index=False)
+
+    return jsonify({"message": "Scraping complete", "total_leads": len(all_leads)})
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=8080)
+    
