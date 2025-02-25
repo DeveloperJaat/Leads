@@ -1,71 +1,65 @@
-import requests
-import json
+from flask import Flask, request, jsonify, send_file
 import pandas as pd
-from flask import Flask, request, jsonify
+import requests
+import os
 
 app = Flask(__name__)
 
-# List of 7 API keys and their corresponding Search Engine IDs
+# Load API Keys & Search Engine IDs
 API_KEYS = [
-    {"api_key": "AIzaSyBMFL8kL6li79HITDgVhww3sp6V8ko52No", "cx": "7603a783722314f9e"},
-    {"api_key": "AIzaSyAlKIjAndVVR1L3UepwqgLXbfNtB8kifm4", "cx": "03902cb98cf1e4449"},
-    {"api_key": "AIzaSyBmWLJN79KCzPMLpx2aKAtLTNMaojY8E9Y", "cx": "a101f70851bd44bd8"},
-    {"api_key": "AIzaSyBW28I3Tin6UhJFE5RxCtZr_oMTfN78JgQ", "cx": "92ed59afad365451b"},
-    {"api_key": "AIzaSyBWIyKHZ_qNo3onBt9HmrsoXcWLtgTCH6Q", "cx": "a364d5a15cfca4a91"},
-    {"api_key": "AIzaSyB8n5E_VX71tyt9BPur4NwgEdAZr146Ub0", "cx": "e62229679dace4132"},
-    {"api_key": "AIzaSyDTese0HQ3pRhctmXFxB_-8nvlfttrbA00", "cx": "85518902d005249f6"},
+    "AIzaSyBMFL8kL6li79HITDgVhww3sp6V8ko52No", "AIzaSyAlKIjAndVVR1L3UepwqgLXbfNtB8kifm4", "AIzaSyBmWLJN79KCzPMLpx2aKAtLTNMaojY8E9Y", "AIzaSyBW28I3Tin6UhJFE5RxCtZr_oMTfN78JgQ", "AIzaSyBWIyKHZ_qNo3onBt9HmrsoXcWLtgTCH6Q", "AIzaSyB8n5E_VX71tyt9BPur4NwgEdAZr146Ub0", "AIzaSyDTese0HQ3pRhctmXFxB_-8nvlfttrbA00"
+]
+SEARCH_ENGINE_IDS = [
+    "7603a783722314f9e", "03902cb98cf1e4449", "a101f70851bd44bd8", "92ed59afad365451b", "a364d5a15cfca4a91", "e62229679dace4132", "85518902d005249f6"
 ]
 
-# Function to fetch search results using rotating API keys
-def fetch_results(query, start_index):
-    api_info = API_KEYS[start_index % len(API_KEYS)]
-    api_key = api_info["api_key"]
-    cx = api_info["cx"]
-    
-    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={cx}"
+# Function to get leads from Google Search API
+def get_leads(query, api_key, search_engine_id):
+    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={search_engine_id}"
     response = requests.get(url)
-    
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
+    data = response.json()
 
-# Extract and filter useful lead data
-def extract_leads(data):
     leads = []
-    for item in data.get("items", []):
-        title = item.get("title", "")
-        link = item.get("link", "")
-        snippet = item.get("snippet", "")
-
-        # Simulate extracting emails (replace with real email extraction logic)
-        email = "example@example.com" if "contact" in snippet.lower() else ""
-
-        if email:
-            first_name, last_name = title.split(" ")[0], title.split(" ")[-1]
-            leads.append({"First Name": first_name, "Last Name": last_name, "Email": email, "Website": link})
-    
+    if "items" in data:
+        for item in data["items"]:
+            lead = {
+                "name": item.get("title", ""),
+                "email": "",  # Email Extraction Logic Needed
+                "website": item.get("link", ""),
+                "contact": item.get("snippet", ""),
+            }
+            leads.append(lead)
     return leads
 
-@app.route('/scrape', methods=['GET'])
+@app.route('/scrape', methods=['POST'])
 def scrape():
-    query = request.args.get("query")
-    total_results = 600
-    results_per_request = 90
-    all_leads = []
+    try:
+        data = request.json
+        query = data.get("query", "")
+        
+        if not query:
+            return jsonify({"error": "Query is required!"}), 400
 
-    for i in range(0, total_results, results_per_request):
-        data = fetch_results(query, i // results_per_request)
-        if data:
-            leads = extract_leads(data)
+        all_leads = []
+        for i in range(len(API_KEYS)):
+            leads = get_leads(query, API_KEYS[i], SEARCH_ENGINE_IDS[i])
             all_leads.extend(leads)
 
-    # Convert to DataFrame and save to Excel
-    df = pd.DataFrame(all_leads)
-    df.to_excel("leads.xlsx", index=False)
+        # Remove leads without email
+        all_leads = [lead for lead in all_leads if lead["email"]]
 
-    return jsonify({"message": "Scraping complete", "total_leads": len(all_leads)})
+        # Convert to DataFrame
+        df = pd.DataFrame(all_leads)
+        df.to_excel("leads.xlsx", index=False)
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
-    
+        return jsonify({"message": "Scraping complete", "total_leads": len(all_leads)})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/download', methods=['GET'])
+def download():
+    return send_file("leads.xlsx", as_attachment=True)
+
+if __name__ == "__main__":
+    app.run(debug=True)
