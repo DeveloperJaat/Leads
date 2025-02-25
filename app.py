@@ -7,10 +7,18 @@ app = Flask(__name__)
 
 # Load API Keys & Search Engine IDs
 API_KEYS = [
-    "AIzaSyBMFL8kL6li79HITDgVhww3sp6V8ko52No", "AIzaSyAlKIjAndVVR1L3UepwqgLXbfNtB8kifm4", "AIzaSyBmWLJN79KCzPMLpx2aKAtLTNMaojY8E9Y", "AIzaSyBW28I3Tin6UhJFE5RxCtZr_oMTfN78JgQ", "AIzaSyBWIyKHZ_qNo3onBt9HmrsoXcWLtgTCH6Q", "AIzaSyB8n5E_VX71tyt9BPur4NwgEdAZr146Ub0", "AIzaSyDTese0HQ3pRhctmXFxB_-8nvlfttrbA00"
+    "AIzaSyBMFL8kL6li79HITDgVhww3sp6V8ko52No", 
+    "AIzaSyAlKIjAndVVR1L3UepwqgLXbfNtB8kifm4", 
+    "AIzaSyBmWLJN79KCzPMLpx2aKAtLTNMaojY8E9Y", 
+    "AIzaSyBW28I3Tin6UhJFE5RxCtZr_oMTfN78JgQ", 
+    "AIzaSyBWIyKHZ_qNo3onBt9HmrsoXcWLtgTCH6Q", 
+    "AIzaSyB8n5E_VX71tyt9BPur4NwgEdAZr146Ub0", 
+    "AIzaSyDTese0HQ3pRhctmXFxB_-8nvlfttrbA00"
 ]
 SEARCH_ENGINE_IDS = [
-    "7603a783722314f9e", "03902cb98cf1e4449", "a101f70851bd44bd8", "92ed59afad365451b", "a364d5a15cfca4a91", "e62229679dace4132", "85518902d005249f6"
+    "7603a783722314f9e", "03902cb98cf1e4449", "a101f70851bd44bd8", 
+    "92ed59afad365451b", "a364d5a15cfca4a91", "e62229679dace4132", 
+    "85518902d005249f6"
 ]
 
 # Function to get leads from Google Search API
@@ -31,6 +39,12 @@ def get_leads(query, api_key, search_engine_id):
             leads.append(lead)
     return leads
 
+# 🔹 Default Route (Fixes 404 Error)
+@app.route('/')
+def home():
+    return jsonify({"message": "Welcome to the Flask App! Your server is running successfully."})
+
+# 🔹 Scrape Route
 @app.route('/scrape', methods=['POST'])
 def scrape():
     try:
@@ -57,9 +71,14 @@ def scrape():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# 🔹 Download Leads File
 @app.route('/download', methods=['GET'])
 def download():
-    return send_file("leads.xlsx", as_attachment=True)
+    if os.path.exists("leads.xlsx"):
+        return send_file("leads.xlsx", as_attachment=True)
+    else:
+        return jsonify({"error": "No file found. Please run /scrape first."}), 404
 
+# 🔹 Run Flask App (Fix for Koyeb)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
