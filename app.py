@@ -7,13 +7,13 @@ app = Flask(__name__)
 
 # List of 7 API keys and their corresponding Search Engine IDs
 API_KEYS = [
-    {"api_key": "YOUR_API_KEY_1", "cx": "YOUR_SEARCH_ENGINE_ID_1"},
-    {"api_key": "YOUR_API_KEY_2", "cx": "YOUR_SEARCH_ENGINE_ID_2"},
-    {"api_key": "YOUR_API_KEY_3", "cx": "YOUR_SEARCH_ENGINE_ID_3"},
-    {"api_key": "YOUR_API_KEY_4", "cx": "YOUR_SEARCH_ENGINE_ID_4"},
-    {"api_key": "YOUR_API_KEY_5", "cx": "YOUR_SEARCH_ENGINE_ID_5"},
-    {"api_key": "YOUR_API_KEY_6", "cx": "YOUR_SEARCH_ENGINE_ID_6"},
-    {"api_key": "YOUR_API_KEY_7", "cx": "YOUR_SEARCH_ENGINE_ID_7"},
+    {"api_key": "AIzaSyBMFL8kL6li79HITDgVhww3sp6V8ko52No", "cx": "7603a783722314f9e"},
+    {"api_key": "AIzaSyAlKIjAndVVR1L3UepwqgLXbfNtB8kifm4", "cx": "03902cb98cf1e4449"},
+    {"api_key": "AIzaSyBmWLJN79KCzPMLpx2aKAtLTNMaojY8E9Y", "cx": "a101f70851bd44bd8"},
+    {"api_key": "AIzaSyBW28I3Tin6UhJFE5RxCtZr_oMTfN78JgQ", "cx": "92ed59afad365451b"},
+    {"api_key": "AIzaSyBWIyKHZ_qNo3onBt9HmrsoXcWLtgTCH6Q", "cx": "a364d5a15cfca4a91"},
+    {"api_key": "AIzaSyB8n5E_VX71tyt9BPur4NwgEdAZr146Ub0", "cx": "e62229679dace4132"},
+    {"api_key": "AIzaSyDTese0HQ3pRhctmXFxB_-8nvlfttrbA00", "cx": "85518902d005249f6"},
 ]
 
 # Function to fetch search results using rotating API keys
