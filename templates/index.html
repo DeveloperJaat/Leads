@@ -1,53 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Search API</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-        }
-        input {
-            width: 60%;
-            padding: 10px;
-            margin: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            cursor: pointer;
-        }
-        #results {
-            margin-top: 20px;
-            text-align: left;
-            display: inline-block;
-        }
-    </style>
+    <title>Lead Scraper</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>Google Search API</h2>
-    <input type="text" id="query" placeholder="Enter search query">
-    <button onclick="search()">Search</button>
-    <div id="results"></div>
 
-    <script>
-        function search() {
-            let query = document.getElementById("query").value;
-            fetch(`/search?query=${query}`)
-            .then(response => response.json())
-            .then(data => {
-                let resultDiv = document.getElementById("results");
-                resultDiv.innerHTML = "<h3>Search Results:</h3>";
-                data.results.forEach((item, index) => {
-                    resultDiv.innerHTML += `<p><b>${index + 1}.</b> <a href="${item.link}" target="_blank">${item.title}</a></p>`;
-                });
-            });
-        }
-    </script>
+    <h1>Google Lead Scraper</h1>
+    <form id="scrapeForm">
+        <input type="text" id="query" name="query" placeholder="Enter Search Query">
+        <button type="submit">Scrape</button>
+    </form>
+
+    <p id="message"></p>
+    
+    <a id="downloadLink" href="/download" style="display:none;">Download Leads</a>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
