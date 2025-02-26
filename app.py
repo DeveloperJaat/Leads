@@ -14,7 +14,7 @@ def home():
         domain_extension = request.form["domain_extension"]
         location = request.form["location"]
 
-        search_query = f'"{business_name}" "{domain_extension}" "{location}"'
+        query = f'"{business_name}" "{domain_extension}" "{location}"'
         url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={GOOGLE_SEARCH_API_KEY}&cx={SEARCH_ENGINE_ID}"
 
         response = requests.get(url)
