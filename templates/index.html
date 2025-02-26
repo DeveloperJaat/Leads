@@ -3,21 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lead Scraper</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Lead Finder</title>
 </head>
 <body>
+    <h2>Find Business Leads</h2>
+    <form method="POST">
+        <label>Business Name:</label>
+        <input type="text" name="business_name" required><br><br>
 
-    <h1>Google Lead Scraper</h1>
-    <form id="scrapeForm">
-        <input type="text" id="query" name="query" placeholder="Enter Search Query">
-        <button type="submit">Scrape</button>
+        <label>Domain Extension:</label>
+        <input type="text" name="domain_extension" required><br><br>
+
+        <label>Location:</label>
+        <input type="text" name="location" required><br><br>
+
+        <button type="submit">Find Leads</button>
     </form>
 
-    <p id="message"></p>
-    
-    <a id="downloadLink" href="/download" style="display:none;">Download Leads</a>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% if results %}
+        <h3>Results:</h3>
+        <ul>
+            {% for item in results %}
+                <li><a href="{{ item.link }}" target="_blank">{{ item.title }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </body>
 </html>
