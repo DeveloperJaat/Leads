@@ -15,7 +15,7 @@ def home():
         location = request.form["location"]
 
         query = f'"{business_name}" "{domain_extension}" "{location}"'
-        url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={GOOGLE_SEARCH_API_KEY}&cx={SEARCH_ENGINE_ID}"
+        url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={GOOGLE_SEARCH_API_KEY}&cx={SEARCH_ENGINE_ID}"&num=100
 
         response = requests.get(url)
         results = response.json()
