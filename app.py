@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request
 import requests
 import os  # ✅ Environment Variables पढ़ने के लिए
+from search import google_search
+
 
 app = Flask(__name__)
 

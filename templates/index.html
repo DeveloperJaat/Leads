@@ -3,30 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lead Finder</title>
+    <title>Lead Search Tool</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+        }
+        h2 {
+            color: #ffcc00;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #ffcc00;
+            color: black;
+            font-size: 18px;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #ffaa00;
+        }
+    </style>
 </head>
 <body>
-    <h2>Find Business Leads</h2>
-    <form action="/" method="POST">
-        <label>Business Name:</label>
-        <input type="text" name="business_name" required><br><br>
+    <div class="container">
+        <h2>Lead Search Tool</h2>
+        <input type="text" id="platform" placeholder="Enter Platform (e.g. instagram.com)">
+        <input type="text" id="emailFormat" placeholder="Email Format (e.g. @gmail.com)">
+        <input type="text" id="businessType" placeholder="Business Type (e.g. boutiques)">
+        <input type="text" id="location" placeholder="Location (e.g. New York)">
+        <button onclick="searchLeads()">Search Leads</button>
+    </div>
 
-        <label>Domain Extension:</label>
-        <input type="text" name="domain_extension" required><br><br>
+    <script>
+        function searchLeads() {
+            let platform = document.getElementById('platform').value;
+            let emailFormat = document.getElementById('emailFormat').value;
+            let businessType = document.getElementById('businessType').value;
+            let location = document.getElementById('location').value;
 
-        <label>Location:</label>
-        <input type="text" name="location" required><br><br>
+            if (!platform || !emailFormat || !businessType || !location) {
+                alert('Please fill in all fields!');
+                return;
+            }
 
-        <button type="submit">Find Leads</button>
-    </form>
-
-    {% if results %}
-        <h3>Results:</h3>
-        <ul>
-            {% for item in results %}
-                <li><a href="{{ item.link }}" target="_blank">{{ item.title }}</a></li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+            let query = `site:${platform} "${emailFormat}" "${businessType}" "${location}"`;
+            alert('Search Query: ' + query);
+            // यहाँ पर इस query को backend को भेजना होगा
+        }
+    </script>
 </body>
 </html>
