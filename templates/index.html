@@ -58,6 +58,11 @@
         <button onclick="searchLeads()">Search Leads</button>
     </div>
 
+    <div class="container" id="resultsContainer">
+        <h3>Results:</h3>
+        <ul id="resultsList"></ul>
+    </div>
+
     <script>
         function searchLeads() {
             let platform = document.getElementById('platform').value;
@@ -71,8 +76,25 @@
             }
 
             let query = `site:${platform} "${emailFormat}" "${businessType}" "${location}"`;
-            alert('Search Query: ' + query);
-            // यहाँ पर इस query को backend को भेजना होगा
+
+            fetch("/search", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultsList = document.getElementById("resultsList");
+                resultsList.innerHTML = "";
+                data.results.forEach(item => {
+                    let li = document.createElement("li");
+                    li.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
+                    resultsList.appendChild(li);
+                });
+            })
+            .catch(error => console.error("Error fetching leads:", error));
         }
     </script>
 </body>
