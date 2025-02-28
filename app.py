@@ -1,8 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import requests
-import os  # ✅ Environment Variables पढ़ने के लिए
-from search import google_search
-
+import os
 
 app = Flask(__name__)
 
@@ -10,22 +8,24 @@ app = Flask(__name__)
 GOOGLE_SEARCH_API_KEY = os.getenv("GOOGLE_SEARCH_API_KEY")  # Koyeb में सेट करें
 SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")  # Koyeb में सेट करें
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def home():
-    if request.method == "POST":
-        business_name = request.form["business_name"]
-        domain_extension = request.form["domain_extension"]
-        location = request.form["location"]
+    return render_template("index.html")
 
-        query = f'"{business_name}" "{domain_extension}" "{location}"'
-        url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={GOOGLE_SEARCH_API_KEY}&cx={SEARCH_ENGINE_ID}"
+@app.route("/search", methods=["POST"])
+def search():
+    data = request.json
+    query = data.get("query")
 
-        response = requests.get(url)
-        results = response.json()
+    if not query:
+        return jsonify({"error": "Query is required"}), 400
 
-        return render_template("index.html", results=results.get("items", []))
+    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={GOOGLE_SEARCH_API_KEY}&cx={SEARCH_ENGINE_ID}"
 
-    return render_template("index.html", results=None)
+    response = requests.get(url)
+    results = response.json()
+
+    return jsonify({"results": results.get("items", [])})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
